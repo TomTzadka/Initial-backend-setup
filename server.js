@@ -3,43 +3,44 @@ import cookieParser from 'cookie-parser'
 
 import { loggerService } from './services/logger.service.js'
 import { bugService } from "./services/bugs.service.js"
+// import { utilService } from "./services/utils.service.js"
 
 const app = express()
 // Express Config:
-// app.use(express.static('public'))
+app.use(express.static('public'))
 app.use(cookieParser())
 
 app.get('/', (req, res) => res.send('Hello there Tom!'))
 
 
 app.get('/api/bugs', (req, res) => {
-    console.log('get');
+    console.log('get all bugs');
+    let cookies = req.cookies
+    console.log(cookies);
     bugService.query()
         .then(bugs => {
             res.send(bugs)
         })
         .catch(err => {
             loggerService.error('Cannot get bugs', err)
-            res.status(400).send('Cannot get bugs')
+            res.status(404).send('Cannot get bugs')
         })
 })
 
 app.get('/api/bugs/save', (req, res) => {
-    return new Promise(res.send('save'))
-    
     const bugToSave = {
-        vendor: req.query.vendor,
-        speed: +req.query.speed,
-        desc: req.query.desc,
+        title: req.query.title,
+        severity: +req.query.severity,
         _id: req.query._id
     }
-    // res.send(req.query)
-    // bugService.save(bugToSave)
-    //     .then(bug => res.send(bug))
-    //     .catch((err) => {
-    //         loggerService.error('Cannot save bug', err)
-    //         res.status(400).send('Cannot save bug')
-    //     })
+    console.log(`save bug ${bugToSave}`);
+
+    bugService.save(bugToSave)
+        .then(bug => res.send(bug))
+        .catch((err) => {
+            loggerService.error('Cannot save bug', err)
+            res.status(400).send('Cannot save bug')
+        })
 })
 
 
@@ -50,8 +51,8 @@ app.get('/api/bugs/:id', (req, res) => {
     bugService.getById(bugId)
         .then(bug => res.send(bug))
         .catch(err => {
-            loggerService.error(err)
-            res.status(400).send('Cannot get bug')
+            loggerService.error('Cannot get bug id',err)
+            res.status(400).send('Cannot get bug id')
         })
 })
 
@@ -71,4 +72,4 @@ app.get('/api/bugs/:id/remove', (req, res) => {
 
 
 const port = 3030
-app.listen(port, () => console.log('Server ready at port 3030'))
+app.listen(port, () => loggerService.info('Server ready at port 3030'))
