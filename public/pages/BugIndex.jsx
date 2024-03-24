@@ -51,6 +51,7 @@ export function BugIndex() {
     function onEditBug(bug) {
         const severity = +prompt('New severity?')
         const bugToSave = { ...bug, severity }
+        console.log('bugToSave',bugToSave);
         bugService
             .save(bugToSave)
             .then((savedBug) => {
@@ -62,6 +63,7 @@ export function BugIndex() {
                 showSuccessMsg('Bug updated')
             })
             .catch((err) => {
+                console.log(bug);
                 console.log('Error from onEditBug ->', err)
                 showErrorMsg('Cannot update bug')
             })

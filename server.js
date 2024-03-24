@@ -10,13 +10,19 @@ const app = express()
 app.use(express.static('public'))
 app.use(cookieParser())
 
-app.get('/', (req, res) => res.send('Hello there Tom!'))
+app.get('/api', (req, res) => {
+    // let visitedCount = req.cookies.visitedCount || 0
+
+    
+    // res.cookie('visitedCount', ++visitedCount, { maxAge: 60*5 * 1000 })
+    // res.send(`<h1>Hello the ${visitedCount}</h1>`)
+})
 
 
 app.get('/api/bugs', (req, res) => {
-    console.log('get all bugs');
-    let cookies = req.cookies
-    console.log(cookies);
+    // console.log('get all bugs');
+    // let cookies = req.cookies
+    // console.log(cookies);
     bugService.query()
         .then(bugs => {
             res.send(bugs)
@@ -47,6 +53,11 @@ app.get('/api/bugs/save', (req, res) => {
 
 
 app.get('/api/bugs/:id', (req, res) => {
+    let visitedBugs = req.cookies.visitedBugs || 0
+    res.cookie('visitedBugs', ++visitedBugs, { maxAge: 60 * 5 * 1000 })
+    
+    if(visitedBugs >= 7) return res.status(401).send('Wait for a bit')
+    
     const bugId = req.params.id
     bugService.getById(bugId)
         .then(bug => res.send(bug))
